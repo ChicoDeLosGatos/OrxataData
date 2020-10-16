@@ -1,4 +1,14 @@
-function OrxataTable(_target, _ajax, _columns, _options, _legend, _onCreate, _onInit) {
+var OrxataTableFactory = {
+    makeProductionTable: function(target, ajax, columns, options, legend, onCreate, onInit) {
+      return new OrxataTable(false, target, ajax, columns, options, legend, onCreate, onInit);
+    },
+    makeTable: function(target, ajax, columns, options, legend, onCreate, onInit) {
+      return new OrxataTable(true, target, ajax, columns, options, legend, onCreate, onInit);
+    }
+  }
+
+function OrxataTable(_verbose, _target, _ajax, _columns, _options, _legend, _onCreate, _onInit) {
+    this.verbose = (_verbose) ? true : false;
     this.dataTable_target = "#" + _target;
     var tmp_table = null;
     this.createCallback = function(row, data, index) {};
@@ -34,13 +44,14 @@ function OrxataTable(_target, _ajax, _columns, _options, _legend, _onCreate, _on
         }
     }
  
-    if (_onCreate) this.createCallback = _onCreate;
-    if (_onInit) this.initCallback = _onInit;
-    if (_options) this.options = _options;
-    if (_ajax) this.ajax = _ajax;
+    if (_onCreate) this.createCallback = _onCreate; else this.print("No onCreate callback detected.");
+    if (_onInit) this.initCallback = _onInit; else this.print("No onInit callback detected.");
+    if (_options) this.options = _options; else this.print("No options detected error.", 1, "NotFoundException.");
+    if (_ajax) this.ajax = _ajax; else this.print("No ajax connection detected.", 1, "NotFoundException.");
 
 
     if (this.options.withButtons == true) {
+        this.print("Data export buttons will be added to the table.");
         tmp_table = $(this.dataTable_target).DataTable({
             scrollY: this.options.scrollY,
             scrollCollapse: this.options.scrollCollapse,
@@ -68,6 +79,8 @@ function OrxataTable(_target, _ajax, _columns, _options, _legend, _onCreate, _on
 
         });
     } else {
+        this.print("Data export buttons will NOT be added to the table.");
+
         tmp_table = $(this.dataTable_target).DataTable({
             scrollY: this.options.scrollY,
             scrollCollapse: this.options.scrollCollapse,
@@ -170,3 +183,16 @@ OrxataTable.prototype.setAjax = function(options) {
     this.options = options;
     this.table.draw();
 }
+
+OrxataTable.prototype.print = function (text, type, ex) {
+    var t = (type) ? type : 0;
+    if(this.verbose){
+      switch(t){
+        case 0: console.log('%c# OrxataTable:', 'background: #3f0000; color: #b678ed',"\t"+text);  break;
+        case 1: console.error(text); throw new Error(ex);
+        case 2: console.warn(text); break;
+        case 3: console.info(text); break;
+        default: console.log(text); break;
+      }
+    }else if(t == 1) throw new Error(ex);
+  }
