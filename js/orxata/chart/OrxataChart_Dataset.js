@@ -1,9 +1,17 @@
-function OrxataChart_Dataset(_label_array, _data_array, _bgcolor_array, _color_array){
+function OrxataChart_Dataset(_label_array, _data_array, _rgba_color_array){
   this.label = (_label_array) ? _label_array : null;
   this.data =  (_data_array) ? _data_array : null;
-  this.backgroundColor = (_bgcolor_array) ? _bgcolor_array : null;
-  this.borderColor = (_color_array) ? _color_array : null;
+	this.backgroundColor = [];
+  this.borderColor = [];
+	if(_rgba_color_array){
+		_rgba_color_array.forEach(c => {
+			this.backgroundColor.push('rgba('+c+', 0.2)');
+			this.borderColor.push('rgba('+c+', 1)');
+
+		});
+	}
   this.dataSet = [];
+  this.orxataClass = "OCDSM";
   for(var x = 0; x < this.data.length; x++)
   {
     var item = {
@@ -17,12 +25,12 @@ function OrxataChart_Dataset(_label_array, _data_array, _bgcolor_array, _color_a
   }
 }
 
-OrxataChart_Dataset.prototype.addItem = function (_label, _data, _bgcolor, _color) {
+OrxataChart_Dataset.prototype.addItem = function (_label, _data, _color) {
   var item = {
       label: _label,
       data: _data,
-      backgroundColor: _bgcolor,
-      borderColor: _color,
+      backgroundColor: 'rgba('+_color+', 0.2)',
+      borderColor: 'rgba('+_color+', 1)',
       borderWidth: 1
     };
     this.dataSet.push(item);
