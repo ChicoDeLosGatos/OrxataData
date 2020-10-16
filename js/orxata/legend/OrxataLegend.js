@@ -1,42 +1,36 @@
 var lb0 = lb1 = lb2 = lb3 = lb4 = lb5 = lb6 = lb7 = lb8 = lb9 = true;
-var verbose = false;
 
-function OrxataLegend(table, sections, caller, filter_function, special_funcs) {
+var OrxataLegendFactory = {
+    makeProductionLegend: function(table, sections, caller, filter_function, special_funcs){
+      return new OrxataLegend(false, table, sections, caller, filter_function, special_funcs);
+    },
+    makeLegend: function(table, sections, caller, filter_function, special_funcs){
+      return new OrxataLegend(true, table, sections, caller, filter_function, special_funcs);
+    }
+  }
+
+function OrxataLegend(verbose, table, sections, caller, filter_function, special_funcs) {
+    this.verbose = (verbose) ? true : false;
     var u = document.location.toLocaleString().split("/");
     var iden = "-" + u[3] + "_" + u[4];
-    var _target = table.split(" ");
-    this.table_name = _target[0];
-    if (_target.length > 1) {
-        for (var x = 1; x < _target.length; x++) {
-            switch (_target[x]) {
-                case "-v":
-                    verbose = true;
-                    break;
-            }
-        }
-    }
+    var _target = table;
+    this.table_name = _target;
+  
     if (filter_function) {
         this.filter_function = filter_function;
-        if (verbose) {
-            console.group("Filter Func");
-            console.log(filter_function.toSource());
-            console.groupEnd();
-            console.log("Filter func loaded succesfully!");
-        }
+            this.print("Filter Func:");
+            this.print(filter_function.toSource());
+            this.print("Filter func loaded succesfully!");
     } else {
-        if (verbose) {
-            console.error("No filter func found.");
-            console.warn("Legend will not work properly :(");
-        }
+            this.print("No filter func found. Pleas check the documentation.", 1, "NotFoundException.");
     }
     if (special_funcs) {
         this.special_funcs = special_funcs;
-        if (verbose) {
-            console.group("Special Funcs");
-            console.log(special_funcs.toSource());
-            console.groupEnd();
-            console.log("Special funcs loaded succesfully!");
-        }
+       
+            this.print("Special Funcs:");
+            this.print(special_funcs.toSource());
+            this.print("Special funcs loaded succesfully!");
+        
     } else {
         this.special_funcs = function(lbl) {
             var id = "#" + lbl;
@@ -96,13 +90,13 @@ function OrxataLegend(table, sections, caller, filter_function, special_funcs) {
                 $('div.dataTables_scrollFoot ' + id).html("<strike>" + txt + "</strike>");
             }
         };
-        if (verbose) {
-            console.warn("No special functions found. Default functions set.");
-        }
+       
+        this.print("No special functions found. Default functions set.");
+        
     }
     $("#" + this.table_name).on('init.dt', function() {
-        var footer = $("#" + _target[0] + "_footer");
-        var html = "<th scope='col' colspan='" + $("#" + _target[0])[0].childNodes.length + "'>";
+        var footer = $("#" + _target + "_footer");
+        var html = "<th scope='col' colspan='" + $("#" + _target)[0].childNodes.length + "'>";
         for (var x = 0; x < sections.length; x++) {
             html += "<span onclick='javascript:" + caller.name + "(" + x +
                 ");' style='cursor:pointer;' class='unselected'><svg style='margin-left:2em; border:1px solid;' width='20' height='15'>" +
@@ -117,14 +111,28 @@ function OrxataLegend(table, sections, caller, filter_function, special_funcs) {
                 caller(x);
             }
         }
-        if (verbose) {
-            console.log("Legend was created succesfully yay!!");
-        }
+            this.print("Legend was created succesfully.");
+        
     });
 }
 OrxataLegend.prototype.filter = function(idx) {
+    this.print("Filtering by index: "+ idx);
     var lbl = "lbl" + idx;
     this.special_funcs(lbl);
     this.filter_function(lbl);
     $('#' + this.table_name).DataTable().draw();
 };
+
+
+OrxataLegend.prototype.print = function (text, type, ex) {
+    var t = (type) ? type : 0;
+    if(this.verbose){
+      switch(t){
+        case 0: console.log('%c# OrxataLegend:', 'background: #002105; color: #56d854',"\t"+text);  break;
+        case 1: console.error(text); throw new Error(ex);
+        case 2: console.warn(text); break;
+        case 3: console.info(text); break;
+        default: console.log(text); break;
+      }
+    }else if(t == 1) throw new Error(ex);
+  }
