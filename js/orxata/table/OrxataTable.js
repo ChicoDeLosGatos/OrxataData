@@ -4,7 +4,8 @@ var OrxataTableFactory = {
     },
     makeTable: function(target, ajax, columns, options, legend, onCreate, onInit) {
       return new OrxataTable(true, target, ajax, columns, options, legend, onCreate, onInit);
-    }
+    },
+	
   }
 
 function OrxataTable(_verbose, _target, _ajax, _columns, _options, _legend, _onCreate, _onInit) {
@@ -18,37 +19,64 @@ function OrxataTable(_verbose, _target, _ajax, _columns, _options, _legend, _onC
     this.ajax = {};
     this.options = {};
 
-    if (_columns) {
+    
         for (var x = 0; x < _columns.length; x++) {
             var item = _columns[x];
             var columnItem = {
                 data: item[0]
             };
-            var columnDefinition = (item[1]) ? {
-                targets: x,
-                render: function(data, type, row) {
-                    var out = '';
-                    out = item[1](data, type, row);
-                    return out;
-                }
-            } : {
-                targets: x,
-                render: function(data, type, row) {
-
-                    return data;
-                }
-            };
-
+			var cdf = item[1];
+			 var columnDefinition = null;
+			if(cdf instanceof Function) {
+				columnDefinition = {
+                	targets: x,
+                	render: null
+             	};
+				columnDefinition.render = cdf;
+			}else{
+				columnDefinition = {
+                	targets: x,
+                	render: function(data, type, row) {
+                    	return data;
+                	}
+            	};
+			}
+            
             this.columns.push(columnItem);
             this.columnDefinitions.push(columnDefinition);
         }
-    }
+    
  
     if (_onCreate) this.createCallback = _onCreate; else this.print("No onCreate callback detected.");
     if (_onInit) this.initCallback = _onInit; else this.print("No onInit callback detected.");
     if (_options) this.options = _options; else this.print("No options detected error.", 1, "NotFoundException.");
     if (_ajax) this.ajax = _ajax; else this.print("No ajax connection detected.", 1, "NotFoundException.");
-
+	
+	/*this.options.lang = {
+    "decimal":        "",
+    "emptyTable":     "No hay datos disponibles",
+    "info":           "Mostrando _START_ a _END_ de _TOTAL_ datos",
+    "infoEmpty":      "Mostrando 0 a 0 de 0 datos",
+    "infoFiltered":   "(filtrado de _MAX_ total de datos)",
+    "infoPostFix":    "",
+    "thousands":      ",",
+    "lengthMenu":     "Mostrar _MENU_",
+    "loadingRecords": "Cargando...",
+    "processing":     "Procesando...",
+    "search":         "<i class='fa fa-search'></i>",
+    "zeroRecords":    "No se han encontrado registros coincidentes con los filtros seleccionados.",
+    "paginate": {
+        "first":      "Primero",
+        "last":       "Ultimo",
+        "next":       "Siguiente",
+        "previous":   "Anterior"
+    },
+    "aria": {
+        "sortAscending":  ": activar para ordenar la columna ascendente",
+        "sortDescending": ": activar para ordenar la columna descendente"
+    }
+};
+*/
 
     if (this.options.withButtons == true) {
         this.print("Data export buttons will be added to the table.");
@@ -56,7 +84,7 @@ function OrxataTable(_verbose, _target, _ajax, _columns, _options, _legend, _onC
             scrollY: this.options.scrollY,
             scrollCollapse: this.options.scrollCollapse,
             pageLength: this.options.pageLength,
-            language: this.options.lang,
+            language: this.options.language,
             ajax: this.ajax,
             order: this.options.order,
             columns: this.columns,
@@ -85,7 +113,7 @@ function OrxataTable(_verbose, _target, _ajax, _columns, _options, _legend, _onC
             scrollY: this.options.scrollY,
             scrollCollapse: this.options.scrollCollapse,
             pageLength: this.options.pageLength,
-            language: this.options.lang,
+            language: this.options.language,
             ajax: this.ajax,
             order: this.options.order,
             columns: this.columns,
