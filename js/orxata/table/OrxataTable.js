@@ -26,7 +26,6 @@ function OrxataTable(_verbose, _target, _ajax, _columns, _options, _legend, _onC
     this.ajax = {};
     this.options = {};
 
-    
         for (var x = 0; x < _columns.length; x++) {
             var item = _columns[x];
             var columnItem = {
