@@ -1,3 +1,14 @@
+/*!Orxata Legend*/
+/**
+* 
+* Version: 0.5
+* Requires: jQuery v1.7+, DataTables
+*
+* Copyright (c) Orxata Software
+* Under Creative Commons License (https://creativecommons.org/licenses/by/4.0)
+*
+*/
+
 var lb0 = lb1 = lb2 = lb3 = lb4 = lb5 = lb6 = lb7 = lb8 = lb9 = true;
 
 var OrxataLegendFactory = {
