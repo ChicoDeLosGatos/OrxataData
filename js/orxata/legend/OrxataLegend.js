@@ -1,11 +1,13 @@
 /*!Orxata Legend*/
 /**
 * 
-* Version: 0.5
+* Version: 0.7
 * Requires: jQuery v1.7+, DataTables
 *
 * Copyright (c) Orxata Software
 * Under Creative Commons License (https://creativecommons.org/licenses/by/4.0)
+*
+* Thanks for using! :P
 *
 */
 
