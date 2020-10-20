@@ -1,3 +1,16 @@
+/*!Orxata Chart*/
+/**
+* 
+* Version: 0.9
+* Requires: jQuery v1.7+, ChartJS
+*
+* Copyright (c) Orxata Software
+* Under Creative Commons License (https://creativecommons.org/licenses/by/4.0)
+*
+* Thanks for using! :P
+*
+*/
+
 var OrxataChartFactory = {
   makeProductionChart: function(target, type, labels, datasets, options){
     return new OrxataChart(false, target, type, labels, datasets, options);
