@@ -1,3 +1,16 @@
+/*!Orxata Chart*/
+/**
+* 
+* Version: 0.9
+* Requires: jQuery v1.7+, ChartJS
+*
+* Copyright (c) Orxata Software
+* Under Creative Commons License (https://creativecommons.org/licenses/by/4.0)
+*
+* Thanks for using! :P
+*
+*/
+
 function OrxataChart_Dataset(_label_array, _data_array, _rgba_color_array){
   this.label = (_label_array) ? _label_array : null;
   this.data =  (_data_array) ? _data_array : null;
