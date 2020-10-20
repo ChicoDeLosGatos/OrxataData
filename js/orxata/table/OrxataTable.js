@@ -2,10 +2,12 @@
 /**
 * 
 * Version: 0.5
-* Requires: jQuery v1.7+, jQuery Knob, DataTables
+* Requires: jQuery v1.7+, jQuery Knob, DataTables, OrxataLegend
 *
 * Copyright (c) Orxata Software
 * Under Creative Commons License (https://creativecommons.org/licenses/by/4.0)
+*
+* Thanks for using! :P
 *
 */
 
