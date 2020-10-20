@@ -1,3 +1,8 @@
+/*!*/
+/**
+ *
+ */
+
 var OrxataTableFactory = {
     prepareTable: function (identificator, fields) {
         var container = $("#orxata-table-container");
