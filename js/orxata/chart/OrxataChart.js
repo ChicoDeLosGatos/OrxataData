@@ -2,7 +2,7 @@
 /**
 * 
 * Version: 0.9
-* Requires: jQuery v1.7+, ChartJS
+* Requires: jQuery v1.7+, ChartJS, OrxataChart_Dataset
 *
 * Copyright (c) Orxata Software
 * Under Creative Commons License (https://creativecommons.org/licenses/by/4.0)
