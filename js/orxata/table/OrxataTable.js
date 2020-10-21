@@ -170,7 +170,12 @@ function OrxataTable(_verbose, _target, _ajax, _columns, _options, _legend, _onC
     this.legend = _legend;
 
     $(this.dataTable_target).on('init.dt', this.initCallback);
+	
 
+}
+
+OrxataTable.prototype.getTable = function () {
+	return this.datatable;
 }
 
 OrxataTable.prototype.draw = function () {
