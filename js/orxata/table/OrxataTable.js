@@ -86,6 +86,7 @@ function OrxataTable(_verbose, _target, _ajax, _columns, _options, _legend, _onC
 			delete _aux_opt["knob_by"];
 		}
 		this.options = _aux_opt;
+
 		
 	}
     else this.print("No options detected error.", 1, "NotFoundException.");
@@ -94,10 +95,11 @@ function OrxataTable(_verbose, _target, _ajax, _columns, _options, _legend, _onC
 
 
     if (this.settings.withKnobs == true && this.settings.knob_by) {
-        this.print("Knobs are active");
+ 
         var auxInitCallback = this.initCallback;
 		var verb = this.verbose;
         var opts = this.settings.knob_by;
+		var ctx = this;
         this.initCallback = function (settings, json) {
             var total_data = [];
             var knob_by = opts; //	Min: 1. Max: 2
@@ -114,11 +116,14 @@ function OrxataTable(_verbose, _target, _ajax, _columns, _options, _legend, _onC
                 json.aoData.forEach(d => total_data.push(d._aData[knoba[0]] + "."));
             }
             total_data = total_data.sort();
+						
             var result = total_data.reduce((a, c) => (a[c] = (a[c] || 0) + 1, a), Object.create(null));
             var output = Object.entries(result).map(([key, value]) => ({
                 key,
                 value
             }));
+			
+			
             var max = 0;
             output.forEach(knob => max += knob.value);
 
@@ -127,8 +132,7 @@ function OrxataTable(_verbose, _target, _ajax, _columns, _options, _legend, _onC
                 outputKnob += '<div class="col-lg-2 col-md-3 col-sm-4 col-xs-6 text-center" style="height: 135px;"> <input type="text" class="knob" value="' + knob.value + '" tickColorizeValues="true" inputColor="#3C8DBC" data-min="0" data-max="' + max + '" data-width="90" data-height="90" data-fgColor="#3c8dbc" readonly /> <div class="knob-label">' + knob.key + '</div></div>';
             });
             outputKnob += '</div></div></div>';
-            var currentHtml = $("#orxata-table-container").html()
-            $("#orxata-table-container").html(currentHtml + outputKnob);
+             $("#orxata-table-container").append(outputKnob);
 
             $(".knob").knob();
 
@@ -144,7 +148,6 @@ function OrxataTable(_verbose, _target, _ajax, _columns, _options, _legend, _onC
             scrollCollapse: this.options.scrollCollapse,
             pageLength: this.options.pageLength,
             language: this.options.language,
-			  "bFilter":   true,
             ajax: this.ajax,
             order: this.options.order,
             columns: this.columns,
@@ -174,7 +177,6 @@ function OrxataTable(_verbose, _target, _ajax, _columns, _options, _legend, _onC
             scrollY: this.options.scrollY,
             scrollCollapse: this.options.scrollCollapse,
             pageLength: this.options.pageLength,
-			  "bFilter":   true,
             language: this.options.language,
             ajax: this.ajax,
             order: this.options.order,
