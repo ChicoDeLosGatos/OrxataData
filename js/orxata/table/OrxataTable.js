@@ -1,7 +1,7 @@
 /*!Orxata Table*/
 /**
 * 
-* Version: 0.7
+* Version: 0.8
 * Requires: jQuery v1.7+, jQuery Knob, DataTables, OrxataLegend
 *
 * Copyright (c) Orxata Software
@@ -34,6 +34,7 @@ function OrxataTable(_verbose, _target, _ajax, _columns, _options, _legend, _onC
     var tmp_table = null;
     this.createCallback = function (row, data, index) {};
     this.initCallback = function () {};
+	this.searchCallback = function () {};
     this.columnDefinitions = [];
     this.columns = [];
     this.ajax = {};
@@ -97,47 +98,22 @@ function OrxataTable(_verbose, _target, _ajax, _columns, _options, _legend, _onC
     if (this.settings.withKnobs == true && this.settings.knob_by) {
  
         var auxInitCallback = this.initCallback;
+		 var auxSearchCallback = this.searchCallback;
 		var verb = this.verbose;
         var opts = this.settings.knob_by;
 		var ctx = this;
         this.initCallback = function (settings, json) {
-            var total_data = [];
-            var knob_by = opts; //	Min: 1. Max: 2
-            if(verb) console.log('%c# OrxataTable:', 'background: #3f0000; color: #b678ed', "\t" + "Knobing by: " + knob_by);
-            var avadata = Object.getOwnPropertyNames(json.aoData[0]._aData).sort();
-
-            if(verb) console.log('%c# OrxataTable:', 'background: #3f0000; color: #b678ed', "\t" + "Available data(s) for knob: ", avadata.join(", "));
-
-            var knoba = knob_by.split(", ");
-            if (knoba.length > 1) {
-                json.aoData.forEach(d => total_data.push("(" + d._aData[knoba[0]] + "). " + d._aData[knoba[1]] + "."));
-            }
-            else {
-                json.aoData.forEach(d => total_data.push(d._aData[knoba[0]] + "."));
-            }
-            total_data = total_data.sort();
-						
-            var result = total_data.reduce((a, c) => (a[c] = (a[c] || 0) + 1, a), Object.create(null));
-            var output = Object.entries(result).map(([key, value]) => ({
-                key,
-                value
-            }));
-			
-			
-            var max = 0;
-            output.forEach(knob => max += knob.value);
-
-            var outputKnob = '<div id="box-knob" class="box box-solid"><div class="box-body"><div class="row">';
-            output.forEach(knob => {
-                outputKnob += '<div class="col-lg-2 col-md-3 col-sm-4 col-xs-6 text-center" style="height: 135px;"> <input type="text" class="knob" value="' + knob.value + '" tickColorizeValues="true" inputColor="#3C8DBC" data-min="0" data-max="' + max + '" data-width="90" data-height="90" data-fgColor="#3c8dbc" readonly /> <div class="knob-label">' + knob.key + '</div></div>';
-            });
+            var outputKnob = '<div id="box-knob" class="box box-solid"><div class="box-body"><div class="row" id="orxata-table-knobs">';
             outputKnob += '</div></div></div>';
              $("#orxata-table-container").append(outputKnob);
-
-            $(".knob").knob();
-
+			ctx.makeKnobs();
             auxInitCallback.call(this, [settings, json]);
-        }
+        };
+		
+		this.searchCallback = function () {
+		if(ctx.table.rows().data()[0] != undefined) ctx.makeKnobs();
+			auxSearchCallback.call();
+		}
 
     }
 
@@ -188,12 +164,52 @@ function OrxataTable(_verbose, _target, _ajax, _columns, _options, _legend, _onC
 
     this.table = tmp_table;
     this.legend = _legend;
+	
+	
 
-    $(this.dataTable_target).on('init.dt', this.initCallback);
+	$(this.dataTable_target).on('init.dt', this.initCallback);
+    $(this.dataTable_target).on('search.dt', this.searchCallback);
 
 }
 
 
+OrxataTable.prototype.makeKnobs = function () {
+	var data = this.table.rows( { search: 'applied' }).data().toArray();
+	console.log(data[0]);
+	    var total_data = [];
+            var knob_by = this.settings.knob_by; //	Min: 1. Max: 2
+            this.print("Knobing by: " + knob_by);
+            var avadata = Object.getOwnPropertyNames(data[0]).sort();
+
+           this.print(avadata.join(", "));
+
+            var knoba = knob_by.split(", ");
+            if (knoba.length > 1) {
+                data.forEach(d => total_data.push("(" + d[knoba[0]] + "). " + d[knoba[1]] + "."));
+            }
+            else {
+                data.forEach(d => total_data.push(d[knoba[0]] + "."));
+            }
+            total_data = total_data.sort();
+						
+            var result = total_data.reduce((a, c) => (a[c] = (a[c] || 0) + 1, a), Object.create(null));
+            var output = Object.entries(result).map(([key, value]) => ({
+                key,
+                value
+            }));
+			
+			
+            var max = 0;
+            output.forEach(knob => max += knob.value);
+			
+	var outputKnob = '';
+  output.forEach(knob => {
+                outputKnob += '<div class="col-lg-2 col-md-3 col-sm-4 col-xs-6 text-center" style="height: 135px;"> <input type="text" class="knob" value="' + knob.value + '" tickColorizeValues="true" inputColor="#3C8DBC" data-min="0" data-max="' + max + '" data-width="90" data-height="90" data-fgColor="#3c8dbc" readonly /> <div class="knob-label">' + knob.key + '</div></div>';
+            });
+	
+	$("#orxata-table-knobs").html(outputKnob);
+	$(".knob").knob();			
+}
 
 OrxataTable.prototype.getTable = function () {
     return this.table;
