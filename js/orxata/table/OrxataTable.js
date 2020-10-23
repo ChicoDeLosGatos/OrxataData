@@ -19,7 +19,14 @@
  * options.knob_by = 'field_0' || 'field_0, field_1' || 'p_field_0.field_0, field_1' || 'p_field_0.field_0, p_field_0.field_1'; // OK!! :D
  * options.knob_by = 'field_0, field_1, field_2' || 'pp_field_0.p_field_0.field_0, field_1' || 'p_field_0[field_0]'; // BAD!! THIS WILL NOT WORK!!
  *
- * Also remember, for webservice dataset with ajax use the remote Factory Constructor, and for local, use the local one
+ * Also remember, for webservice dataset with ajax use the remote Factory Constructor, and for local, use the local one.
+ *
+ * Example of using the Factory Constructor:
+ * OrxataTableFactory.prepareTable('orxata', ['F1', 'F2', 'F3']); // This will create the main table on the orxata-table-container div
+ * var production_rem_table = OrxataTableFactory.remote.makeProductionTable('orxata', ajax_con, columns, options, orxata_legend, create_callback, init_callback);
+ * var dev_rem_table = OrxataTableFactory.remote.makeTable('orxata', ajax_con, columns, options, orxata_legend, create_callback, init_callback);
+ * var production_local_table = OrxataTableFactory.local.makeProductionTable('orxata', dataset_array, columns, options, orxata_legend, create_callback, init_callback);
+ * var dev_local_table = OrxataTableFactory.local.makeTable('orxata', dataset_array, columns, options, orxata_legend, create_callback, init_callback);
  *
  * Thanks for using! :P
  *
