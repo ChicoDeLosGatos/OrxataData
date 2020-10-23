@@ -1,7 +1,7 @@
 /*!Orxata Table*/
 /**
 * 
-* Version: 0.5
+* Version: 0.7
 * Requires: jQuery v1.7+, jQuery Knob, DataTables, OrxataLegend
 *
 * Copyright (c) Orxata Software
@@ -38,6 +38,7 @@ function OrxataTable(_verbose, _target, _ajax, _columns, _options, _legend, _onC
     this.columns = [];
     this.ajax = {};
     this.options = {};
+	this.settings = {};
 
     for (var x = 0; x < _columns.length; x++) {
         var item = _columns[x];
@@ -65,23 +66,38 @@ function OrxataTable(_verbose, _target, _ajax, _columns, _options, _legend, _onC
         this.columns.push(columnItem);
         this.columnDefinitions.push(columnDefinition);
     }
+		var _aux_opt = _options;
 
 
     if (_onCreate) this.createCallback = _onCreate;
     else this.print("No onCreate callback detected.");
     if (_onInit) this.initCallback = _onInit;
     else this.print("No onInit callback detected.");
-    if (_options) this.options = _options;
+    if (_options){
+		if(_options.withButtons) {
+			this.settings.withButtons = true;
+			delete _aux_opt["withButtons"];
+		}
+		if(_options.withKnobs) {
+			this.print("Found knobs");
+		this.settings.withKnobs = true;
+		this.settings.knob_by = _options.knob_by;
+			delete _aux_opt["withKnobs"];
+			delete _aux_opt["knob_by"];
+		}
+		this.options = _aux_opt;
+		
+	}
     else this.print("No options detected error.", 1, "NotFoundException.");
     if (_ajax) this.ajax = _ajax;
     else this.print("No ajax connection detected.", 1, "NotFoundException.");
 
 
-    if (this.options.withKnobs == true && this.options.knob_by) {
+    if (this.settings.withKnobs == true && this.settings.knob_by) {
         this.print("Knobs are active");
         var auxInitCallback = this.initCallback;
 		var verb = this.verbose;
-        var opts = this.options.knob_by;
+        var opts = this.settings.knob_by;
         this.initCallback = function (settings, json) {
             var total_data = [];
             var knob_by = opts; //	Min: 1. Max: 2
@@ -121,13 +137,14 @@ function OrxataTable(_verbose, _target, _ajax, _columns, _options, _legend, _onC
 
     }
 
-    if (this.options.withButtons == true) {
+    if (this.settings.withButtons == true) {
         this.print("Data export buttons will be added to the table.");
         tmp_table = $(this.dataTable_target).DataTable({
             scrollY: this.options.scrollY,
             scrollCollapse: this.options.scrollCollapse,
             pageLength: this.options.pageLength,
             language: this.options.language,
+			  "bFilter":   true,
             ajax: this.ajax,
             order: this.options.order,
             columns: this.columns,
@@ -157,6 +174,7 @@ function OrxataTable(_verbose, _target, _ajax, _columns, _options, _legend, _onC
             scrollY: this.options.scrollY,
             scrollCollapse: this.options.scrollCollapse,
             pageLength: this.options.pageLength,
+			  "bFilter":   true,
             language: this.options.language,
             ajax: this.ajax,
             order: this.options.order,
@@ -170,20 +188,23 @@ function OrxataTable(_verbose, _target, _ajax, _columns, _options, _legend, _onC
     this.legend = _legend;
 
     $(this.dataTable_target).on('init.dt', this.initCallback);
-	
 
 }
 
+
+
 OrxataTable.prototype.getTable = function () {
-	return this.datatable;
+    return this.table;
 }
 
 OrxataTable.prototype.draw = function () {
     this.table.draw();
 }
 
-OrxataTable.prototype.filter = function (lbl) {
-    this.legend.filter(lbl);
+OrxataTable.prototype.search = function (func){
+    $.fn.dataTable.ext.search.push(function (settings, searchData, index, rowData, counter) {
+       return func(searchData, rowData);
+    });
 }
 
 OrxataTable.prototype.showColumns = function (joined) {
