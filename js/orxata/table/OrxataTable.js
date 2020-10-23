@@ -1,16 +1,15 @@
 /*!Orxata Table*/
 /**
-* 
-* Version: 0.8
-* Requires: jQuery v1.7+, jQuery Knob, DataTables, OrxataLegend
-*
-* Copyright (c) Orxata Software
-* Under Creative Commons License (https://creativecommons.org/licenses/by/4.0)
-*
-* Thanks for using! :P
-*
-*/
-
+ * 
+ * Version: 0.8
+ * Requires: jQuery v1.7+, jQuery Knob, DataTables, OrxataLegend
+ *
+ * Copyright (c) Orxata Software
+ * Under Creative Commons License (https://creativecommons.org/licenses/by/4.0)
+ *
+ * Thanks for using! :P
+ *
+ */
 var OrxataTableFactory = {
     prepareTable: function (identificator, fields) {
         var container = $("#orxata-table-container");
@@ -34,12 +33,12 @@ function OrxataTable(_verbose, _target, _ajax, _columns, _options, _legend, _onC
     var tmp_table = null;
     this.createCallback = function (row, data, index) {};
     this.initCallback = function () {};
-	this.searchCallback = function () {};
+    this.searchCallback = function () {};
     this.columnDefinitions = [];
     this.columns = [];
     this.ajax = {};
     this.options = {};
-	this.settings = {};
+    this.settings = {};
 
     for (var x = 0; x < _columns.length; x++) {
         var item = _columns[x];
@@ -67,53 +66,55 @@ function OrxataTable(_verbose, _target, _ajax, _columns, _options, _legend, _onC
         this.columns.push(columnItem);
         this.columnDefinitions.push(columnDefinition);
     }
-		var _aux_opt = _options;
+    var _aux_opt = _options;
 
 
     if (_onCreate) this.createCallback = _onCreate;
     else this.print("No onCreate callback detected.");
     if (_onInit) this.initCallback = _onInit;
     else this.print("No onInit callback detected.");
-    if (_options){
-		if(_options.withButtons) {
-			this.settings.withButtons = true;
-			delete _aux_opt["withButtons"];
-		}
-		if(_options.withKnobs) {
-			this.print("Found knobs");
-		this.settings.withKnobs = true;
-		this.settings.knob_by = _options.knob_by;
-			delete _aux_opt["withKnobs"];
-			delete _aux_opt["knob_by"];
-		}
-		this.options = _aux_opt;
+    if (_options) {
+        if (_options.withButtons) {
+            this.settings.withButtons = true;
+            delete _aux_opt["withButtons"];
+        }
+        if (_options.withKnobs) {
+            this.print("Found knobs");
+            this.settings.withKnobs = true;
+            this.settings.knob_by = _options.knob_by;
+            delete _aux_opt["withKnobs"];
+            delete _aux_opt["knob_by"];
+        }
+        this.options = _aux_opt;
 
-		
-	}
+
+    }
     else this.print("No options detected error.", 1, "NotFoundException.");
     if (_ajax) this.ajax = _ajax;
     else this.print("No ajax connection detected.", 1, "NotFoundException.");
 
 
     if (this.settings.withKnobs == true && this.settings.knob_by) {
- 
+
         var auxInitCallback = this.initCallback;
-		 var auxSearchCallback = this.searchCallback;
-		var verb = this.verbose;
+        var auxSearchCallback = this.searchCallback;
+        var verb = this.verbose;
         var opts = this.settings.knob_by;
-		var ctx = this;
+        var ctx = this;
         this.initCallback = function (settings, json) {
             var outputKnob = '<div id="box-knob" class="box box-solid"><div class="box-body"><div class="row" id="orxata-table-knobs">';
             outputKnob += '</div></div></div>';
-             $("#orxata-table-container").append(outputKnob);
-			ctx.makeKnobs();
+            $("#orxata-table-container").append(outputKnob);
+
+            ctx.makeKnobs();
+
             auxInitCallback.call(this, [settings, json]);
         };
-		
-		this.searchCallback = function () {
-		if(ctx.table.rows().data()[0] != undefined) ctx.makeKnobs();
-			auxSearchCallback.call();
-		}
+
+        this.searchCallback = function () {
+            ctx.makeKnobs();
+            auxSearchCallback.call();
+        }
 
     }
 
@@ -164,51 +165,98 @@ function OrxataTable(_verbose, _target, _ajax, _columns, _options, _legend, _onC
 
     this.table = tmp_table;
     this.legend = _legend;
-	
-	
 
-	$(this.dataTable_target).on('init.dt', this.initCallback);
+
+
+    $(this.dataTable_target).on('init.dt', this.initCallback);
     $(this.dataTable_target).on('search.dt', this.searchCallback);
 
 }
 
 
 OrxataTable.prototype.makeKnobs = function () {
-	var data = this.table.rows( { search: 'applied' }).data().toArray();
-	console.log(data[0]);
-	    var total_data = [];
-            var knob_by = this.settings.knob_by; //	Min: 1. Max: 2
-            this.print("Knobing by: " + knob_by);
-            var avadata = Object.getOwnPropertyNames(data[0]).sort();
+	if (this.table.rows().data()[0] != undefined){
+		var data = this.table.rows({
+			search: 'applied'
+		}).data().toArray();
+		
+		if(data && data != undefined && data.length > 0){
+			var total_data = [];
+			var knob_by = this.settings.knob_by; //	Min: 1. Max: 2
+			this.print("Knobing by: " + knob_by);
+			var avadata = Object.getOwnPropertyNames(data[0]).sort();
 
-           this.print(avadata.join(", "));
+			this.print(avadata.join(", "));
 
-            var knoba = knob_by.split(", ");
-            if (knoba.length > 1) {
-                data.forEach(d => total_data.push("(" + d[knoba[0]] + "). " + d[knoba[1]] + "."));
-            }
-            else {
-                data.forEach(d => total_data.push(d[knoba[0]] + "."));
-            }
-            total_data = total_data.sort();
-						
-            var result = total_data.reduce((a, c) => (a[c] = (a[c] || 0) + 1, a), Object.create(null));
-            var output = Object.entries(result).map(([key, value]) => ({
-                key,
-                value
-            }));
-			
-			
-            var max = 0;
-            output.forEach(knob => max += knob.value);
-			
-	var outputKnob = '';
-  output.forEach(knob => {
-                outputKnob += '<div class="col-lg-2 col-md-3 col-sm-4 col-xs-6 text-center" style="height: 135px;"> <input type="text" class="knob" value="' + knob.value + '" tickColorizeValues="true" inputColor="#3C8DBC" data-min="0" data-max="' + max + '" data-width="90" data-height="90" data-fgColor="#3c8dbc" readonly /> <div class="knob-label">' + knob.key + '</div></div>';
-            });
-	
-	$("#orxata-table-knobs").html(outputKnob);
-	$(".knob").knob();			
+			var knoba = knob_by.split(", ");
+
+
+
+			if (knoba.length > 1) {
+				var subknoba_0 = knoba[0];
+				var subknoba_1 = knoba[1];
+				var _subknoba_0 = subknoba_0.split(".");
+				var _subknoba_1 = subknoba_1.split(".");
+
+				data.forEach(d => {
+					if (_subknoba_0.length > 1 && _subknoba_1.length > 1) {
+						total_data.push("(" + d[_subknoba_0[0]][_subknoba_0[1]] + "). " + d[_subknoba_1[0]][_subknoba_1[1]] + ".");
+					}
+					else if (_subknoba_0.length > 1) {
+						total_data.push("(" + d[_subknoba_0[0]][_subknoba_0[1]] + "). " + d[subknoba_1] + ".");
+					}
+					else if (_subknoba_1.length > 1) {
+						total_data.push("(" + d[subknoba_0] + "). " + d[_subknoba_1[0]][_subknoba_1[1]] + ".");
+					}
+					else {
+						total_data.push("(" + d[subknoba_0] + "). " + d[subknoba_1] + ".");
+					}
+				});
+			}
+			else {
+				var subknoba_0 = knoba[0];
+				var _subknoba_0 = subknoba_0.split(".");
+				data.forEach(d => {
+					if (_subknoba_0.length > 1) {
+						total_data.push(d[_subknoba_0[0]][_subknoba_0[1]] + ".");
+
+					}
+					else {
+						total_data.push(d[subknoba_0] + ".");
+
+					}
+
+				});
+			}
+			total_data = total_data.sort();
+
+			var result = total_data.reduce((a, c) => (a[c] = (a[c] || 0) + 1, a), Object.create(null));
+			var output = Object.entries(result).map(([key, value]) => ({
+				key,
+				value
+			}));
+
+
+			var max = 0;
+			output.forEach(knob => max += knob.value);
+
+			var outputKnob = '';
+			output.forEach(knob => {
+				outputKnob += '<div class="col-lg-2 col-md-3 col-sm-4 col-xs-6 text-center" style="height: 135px;"> <input type="text" class="knob" value="' + knob.value + '" tickColorizeValues="true" inputColor="#3C8DBC" data-min="0" data-max="' + max + '" data-width="90" data-height="90" data-fgColor="#3c8dbc" readonly /> <div class="knob-label">' + knob.key + '</div></div>';
+			});
+
+			$("#orxata-table-knobs").html(outputKnob);
+			$(".knob").knob();
+		}else{
+			this.print("No data found with this filters.");
+			$("#orxata-table-knobs").html('');
+
+		}
+	}else{
+		this.print("No data found.");
+					$("#orxata-table-knobs").html('');
+
+	}
 }
 
 OrxataTable.prototype.getTable = function () {
@@ -219,9 +267,9 @@ OrxataTable.prototype.draw = function () {
     this.table.draw();
 }
 
-OrxataTable.prototype.search = function (func){
+OrxataTable.prototype.search = function (func) {
     $.fn.dataTable.ext.search.push(function (settings, searchData, index, rowData, counter) {
-       return func(searchData, rowData);
+        return func(searchData, rowData);
     });
 }
 
