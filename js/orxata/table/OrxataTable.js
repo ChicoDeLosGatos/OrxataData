@@ -1,7 +1,7 @@
 /*!Orxata Table*/
 /**
  * 
- * Version: 0.8
+ * Version: 0.8.1
  * Last review: 2020-10-23
  *
  * Requires: jQuery v1.7+, jQuery Knob, DataTables, OrxataLegend
@@ -19,9 +19,13 @@
  * options.knob_by = 'field_0' || 'field_0, field_1' || 'p_field_0.field_0, field_1' || 'p_field_0.field_0, p_field_0.field_1'; // OK!! :D
  * options.knob_by = 'field_0, field_1, field_2' || 'pp_field_0.p_field_0.field_0, field_1' || 'p_field_0[field_0]'; // BAD!! THIS WILL NOT WORK!!
  *
+ * Also remember, for webservice dataset with ajax use the remote Factory Constructor, and for local, use the local one
+ *
  * Thanks for using! :P
  *
  */
+
+
 var OrxataTableFactory = {
     prepareTable: function (identificator, fields) {
         var container = $("#orxata-table-container");
@@ -30,16 +34,25 @@ var OrxataTableFactory = {
         outputHtml += '</tr></thead><tbody></tbody><tfoot id ="' + identificator + '_footer"></tfoot></table>';
         container.html(outputHtml);
     },
-    makeProductionTable: function (target, ajax, columns, options, legend, onCreate, onInit) {
-        return new OrxataTable(false, target, ajax, columns, options, legend, onCreate, onInit);
+    remote: {
+        makeProductionTable: function (target, ajax, columns, options, legend, onCreate, onInit) {
+            return new OrxataTable(false, true, target, ajax, null, columns, options, legend, onCreate, onInit);
+        },
+        makeTable: function (target, ajax, columns, options, legend, onCreate, onInit) {
+            return new OrxataTable(true, true, target, ajax, null, columns, options, legend, onCreate, onInit);
+        },
     },
-    makeTable: function (target, ajax, columns, options, legend, onCreate, onInit) {
-        return new OrxataTable(true, target, ajax, columns, options, legend, onCreate, onInit);
-    },
-
+    local: {
+        makeProductionTable: function (target, data, columns, options, legend, onCreate, onInit) {
+            return new OrxataTable(false, false, target, null, data, columns, options, legend, onCreate, onInit);
+        },
+        makeTable: function (target, data, columns, options, legend, onCreate, onInit) {
+            return new OrxataTable(true, false, target, null, data, columns, options, legend, onCreate, onInit);
+        },
+    }
 }
 
-function OrxataTable(_verbose, _target, _ajax, _columns, _options, _legend, _onCreate, _onInit) {
+function OrxataTable(_verbose, _use_ajax, _target, _ajax, _data, _columns, _options, _legend, _onCreate, _onInit) {
     this.verbose = (_verbose) ? true : false;
     this.dataTable_target = "#" + _target;
     var tmp_table = null;
@@ -51,12 +64,20 @@ function OrxataTable(_verbose, _target, _ajax, _columns, _options, _legend, _onC
     this.ajax = {};
     this.options = {};
     this.settings = {};
+	this.dataset =  [];
 
     for (var x = 0; x < _columns.length; x++) {
         var item = _columns[x];
-        var columnItem = {
-            data: item[0]
-        };
+		
+		if(_use_ajax)
+        	var columnItem = {
+            	data: item[0]
+        	};
+		else
+			var columnItem = {
+            	title: item[0]
+        	};
+		
         var cdf = item[1];
         var columnDefinition = null;
         if (cdf instanceof Function) {
@@ -102,8 +123,11 @@ function OrxataTable(_verbose, _target, _ajax, _columns, _options, _legend, _onC
 
     }
     else this.print("No options detected error.", 1, "NotFoundException.");
+	
     if (_ajax) this.ajax = _ajax;
-    else this.print("No ajax connection detected.", 1, "NotFoundException.");
+    else if(_use_ajax) this.print("No ajax connection detected.", 1, "NotFoundException.");
+	else if(_data) this.dataset = _data;
+	else this.print("No data detected.", 1, "NotFoundException.");
 
 
     if (this.settings.withKnobs == true && this.settings.knob_by) {
@@ -129,15 +153,17 @@ function OrxataTable(_verbose, _target, _ajax, _columns, _options, _legend, _onC
         }
 
     }
+	
+	
+	
 
     if (this.settings.withButtons == true) {
         this.print("Data export buttons will be added to the table.");
-        tmp_table = $(this.dataTable_target).DataTable({
+        tmp_table = {
             scrollY: this.options.scrollY,
             scrollCollapse: this.options.scrollCollapse,
             pageLength: this.options.pageLength,
             language: this.options.language,
-            ajax: this.ajax,
             order: this.options.order,
             columns: this.columns,
             columnDefs: this.columnDefinitions,
@@ -157,25 +183,30 @@ function OrxataTable(_verbose, _target, _ajax, _columns, _options, _legend, _onC
                 },
             ]
 
-        });
+        };
     }
     else {
         this.print("Data export buttons will NOT be added to the table.");
 
-        tmp_table = $(this.dataTable_target).DataTable({
+        tmp_table = {
             scrollY: this.options.scrollY,
             scrollCollapse: this.options.scrollCollapse,
             pageLength: this.options.pageLength,
             language: this.options.language,
-            ajax: this.ajax,
             order: this.options.order,
             columns: this.columns,
             columnDefs: this.columnDefinitions,
             createdRow: this.createCallback,
-        });
+        };
     }
+	
+	if(_use_ajax){
+		tmp_table.ajax = this.ajax;
+	}else{
+		tmp_table.data = this.dataset;
+	}
 
-    this.table = tmp_table;
+    this.table = $(this.dataTable_target).DataTable(tmp_table);
     this.legend = _legend;
 
 
