@@ -1,4 +1,4 @@
-/*!Orxata Chart*/
+/*!Orxata Ajax*/
 /**
 * 
 * Version: 1.0
