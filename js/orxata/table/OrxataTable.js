@@ -1,7 +1,7 @@
 /*!Orxata Table*/
 /**
  * 
- * Version: 0.8.1
+ * Version: 0.8.2
  * Last review: 2020-10-23
  *
  * Requires: jQuery v1.7+, jQuery Knob, DataTables, OrxataLegend
@@ -33,7 +33,7 @@
  */
 
 
-var OrxataTableFactory = {
+const OrxataTableFactory = {
     prepareTable: function (identificator, fields) {
         var container = $("#orxata-table-container");
         var outputHtml = '<table id="' + identificator + '" class="table row-border compact" width="100%" cellspacing="0"><thead><tr>';
@@ -62,7 +62,6 @@ var OrxataTableFactory = {
 function OrxataTable(_verbose, _use_ajax, _target, _ajax, _data, _columns, _options, _legend, _onCreate, _onInit) {
     this.verbose = (_verbose) ? true : false;
     this.dataTable_target = "#" + _target;
-    var tmp_table = null;
     this.createCallback = function (row, data, index) {};
     this.initCallback = function () {};
     this.searchCallback = function () {};
@@ -71,22 +70,30 @@ function OrxataTable(_verbose, _use_ajax, _target, _ajax, _data, _columns, _opti
     this.ajax = {};
     this.options = {};
     this.settings = {};
-	this.dataset =  [];
+    this.dataset =  [];
 
-    for (var x = 0; x < _columns.length; x++) {
-        var item = _columns[x];
+    this.print("You're using OrxataTable in dev mode, remember switch it to production mode before publish your project.", 2);
+
+    let tmp_table = null;
+    let item = null;
+    let columnItem = null;
+    let cdf = null;
+    let columnDefinition = null;
+
+    for (let x = 0; x < _columns.length; x++) {
+        item = _columns[x];
 		
 		if(_use_ajax)
-        	var columnItem = {
+        	columnItem = {
             	data: item[0]
         	};
 		else
-			var columnItem = {
+			columnItem = {
             	title: item[0]
         	};
 		
-        var cdf = item[1];
-        var columnDefinition = null;
+        cdf = item[1];
+        columnDefinition = null;
         if (cdf instanceof Function) {
             columnDefinition = {
                 targets: x,
@@ -106,8 +113,8 @@ function OrxataTable(_verbose, _use_ajax, _target, _ajax, _data, _columns, _opti
         this.columns.push(columnItem);
         this.columnDefinitions.push(columnDefinition);
     }
-    var _aux_opt = _options;
 
+    let _aux_opt = _options;
 
     if (_onCreate) this.createCallback = _onCreate;
     else this.print("No onCreate callback detected.");
@@ -125,8 +132,8 @@ function OrxataTable(_verbose, _use_ajax, _target, _ajax, _data, _columns, _opti
             delete _aux_opt["withKnobs"];
             delete _aux_opt["knob_by"];
         }
-        this.options = _aux_opt;
 
+        this.options = _aux_opt;
 
     }
     else this.print("No options detected error.", 1, "NotFoundException.");
@@ -139,13 +146,14 @@ function OrxataTable(_verbose, _use_ajax, _target, _ajax, _data, _columns, _opti
 
     if (this.settings.withKnobs == true && this.settings.knob_by) {
 
-        var auxInitCallback = this.initCallback;
-        var auxSearchCallback = this.searchCallback;
-        var verb = this.verbose;
-        var opts = this.settings.knob_by;
-        var ctx = this;
+        let auxInitCallback = this.initCallback;
+        let auxSearchCallback = this.searchCallback;
+        let verb = this.verbose;
+        let opts = this.settings.knob_by;
+        let ctx = this;
+	    
         this.initCallback = function (settings, json) {
-            var outputKnob = '<div id="box-knob" class="box box-solid"><div class="box-body"><div class="row" id="orxata-table-knobs">';
+            let outputKnob = '<div id="box-knob" class="box box-solid"><div class="box-body"><div class="row" id="orxata-table-knobs">';
             outputKnob += '</div></div></div>';
             $("#orxata-table-container").append(outputKnob);
 
@@ -162,8 +170,6 @@ function OrxataTable(_verbose, _use_ajax, _target, _ajax, _data, _columns, _opti
     }
 	
 	
-	
-
     if (this.settings.withButtons == true) {
         this.print("Data export buttons will be added to the table.");
         tmp_table = {
@@ -216,8 +222,6 @@ function OrxataTable(_verbose, _use_ajax, _target, _ajax, _data, _columns, _opti
     this.table = $(this.dataTable_target).DataTable(tmp_table);
     this.legend = _legend;
 
-
-
     $(this.dataTable_target).on('init.dt', this.initCallback);
     $(this.dataTable_target).on('search.dt', this.searchCallback);
 
@@ -226,27 +230,26 @@ function OrxataTable(_verbose, _use_ajax, _target, _ajax, _data, _columns, _opti
 
 OrxataTable.prototype.makeKnobs = function () {
     if (this.table.rows().data()[0] != undefined) {
-        var data = this.table.rows({
+        let data = this.table.rows({
             search: 'applied'
         }).data().toArray();
 
         if (data && data != undefined && data.length > 0) {
-            var total_data = [];
-            var knob_by = this.settings.knob_by; //	Min: 1. Max: 2
+            let total_data = [];
+            let knob_by = this.settings.knob_by; //	Min: 1. Max: 2
             this.print("Knobing by: " + knob_by);
-            var avadata = Object.getOwnPropertyNames(data[0]).sort();
+
+            let avadata = Object.getOwnPropertyNames(data[0]).sort();
 
             this.print(avadata.join(", "));
 
-            var knoba = knob_by.split(", ");
-
-
+            let knoba = knob_by.split(", ");
 
             if (knoba.length > 1) {
-                var subknoba_0 = knoba[0];
-                var subknoba_1 = knoba[1];
-                var _subknoba_0 = subknoba_0.split(".");
-                var _subknoba_1 = subknoba_1.split(".");
+                let subknoba_0 = knoba[0];
+                let subknoba_1 = knoba[1];
+                let _subknoba_0 = subknoba_0.split(".");
+                let _subknoba_1 = subknoba_1.split(".");
 
                 data.forEach(d => {
                     if (_subknoba_0.length > 1 && _subknoba_1.length > 1) {
@@ -264,8 +267,8 @@ OrxataTable.prototype.makeKnobs = function () {
                 });
             }
             else {
-                var subknoba_0 = knoba[0];
-                var _subknoba_0 = subknoba_0.split(".");
+                let subknoba_0 = knoba[0];
+                let _subknoba_0 = subknoba_0.split(".");
                 data.forEach(d => {
                     if (_subknoba_0.length > 1) {
                         total_data.push(d[_subknoba_0[0]][_subknoba_0[1]] + ".");
@@ -280,17 +283,17 @@ OrxataTable.prototype.makeKnobs = function () {
             }
             total_data = total_data.sort();
 
-            var result = total_data.reduce((a, c) => (a[c] = (a[c] || 0) + 1, a), Object.create(null));
-            var output = Object.entries(result).map(([key, value]) => ({
+            let result = total_data.reduce((a, c) => (a[c] = (a[c] || 0) + 1, a), Object.create(null));
+            let output = Object.entries(result).map(([key, value]) => ({
                 key,
                 value
             }));
 
 
-            var max = 0;
+            let max = 0;
             output.forEach(knob => max += knob.value);
 
-            var outputKnob = '';
+            let outputKnob = '';
             output.forEach(knob => {
                 outputKnob += '<div class="col-lg-2 col-md-3 col-sm-4 col-xs-6 text-center" style="height: 135px;"> <input type="text" class="knob" value="' + knob.value + '" tickColorizeValues="true" inputColor="#3C8DBC" data-min="0" data-max="' + max + '" data-width="90" data-height="90" data-fgColor="#3c8dbc" readonly /> <div class="knob-label">' + knob.key + '</div></div>';
             });
@@ -326,7 +329,7 @@ OrxataTable.prototype.search = function (func) {
 }
 
 OrxataTable.prototype.showColumns = function (joined) {
-    var cols = [];
+    let cols = [];
     this.columns.foreach(col => cols.push(col.data));
     return (joined) ? cols.join() : cols;
 }
@@ -353,12 +356,17 @@ OrxataTable.prototype.showOptions = function () {
 
 OrxataTable.prototype.setColumns = function (cols) {
     if (cols) {
-        for (var x = 0; x < _columns.length; x++) {
-            var item = _columns[x];
-            var columnItem = {
+        let item = null;
+        let columnItem = null;
+        let columnDefinition = null;
+        for (let x = 0; x < _columns.length; x++) {
+            item = _columns[x];
+            
+            columnItem = {
                 data: item[0]
             };
-            var columnDefinition = (item[1]) ? {
+            
+            columnDefinition = (item[1]) ? {
                 targets: x,
                 render: function (data, type, row) {
                     var out = '';
@@ -401,15 +409,17 @@ OrxataTable.prototype.setAjax = function (options) {
 }
 
 OrxataTable.prototype.print = function (text, type, ex) {
-    var t = (type) ? type : 0;
+    let t = (type) ? type : 0;
     if (this.verbose) {
         switch (t) {
         case 0:
             console.log('%c# OrxataTable:', 'background: #3f0000; color: #b678ed', "\t" + text);
             break;
         case 1:
-            console.error(text);
-            throw new Error(ex);
+            let error = new Error();
+            error.name = ex;
+            error.message = text;
+            throw error
         case 2:
             console.warn(text);
             break;
