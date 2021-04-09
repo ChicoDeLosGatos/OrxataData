@@ -11,7 +11,7 @@
 *
 */
 
-var OrxataChartFactory = {
+const OrxataChartFactory = {
   makeProductionChart: function(target, type, labels, datasets, options){
     return new OrxataChart(false, target, type, labels, datasets, options);
   },
